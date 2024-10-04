@@ -64,6 +64,14 @@ function preprocessScript(data, type) {
       });
     }
 
+    if (vueFile.scriptSetup) {
+      contents.push({
+        content: vueFile.scriptSetup.content.trim(),
+        lang: vueFile.scriptSetup.lang || 'js',
+        lineOffset: vueFile.scriptSetup.loc.start.line
+      });
+    }
+
     if (vueFile.template) {
       const vueTemplate = compileTemplate({source: vueFile.template.content});
       contents.push({
