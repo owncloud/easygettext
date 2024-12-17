@@ -367,11 +367,11 @@ msgstr ""
 "Generated-By: easygettext\\n"
 "Project-Id-Version: \\n"
 
-#: {path}:2
+#: {path}:4
 msgid "Test String 1"
 msgstr ""
 
-#: {path}:4
+#: {path}:13
 msgid "Test String 3"
 msgstr ""
 
