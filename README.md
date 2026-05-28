@@ -1,341 +1,164 @@
 # easygettext
 
-[![Build Status](https://travis-ci.org/Polyconseil/easygettext.svg?branch=master)](https://travis-ci.org/Polyconseil/easygettext)
-[![codecov.io](https://codecov.io/github/Polyconseil/easygettext/coverage.svg?branch=master)](https://codecov.io/github/Polyconseil/easygettext?branch=master)
+<!-- OSPO-managed README | Generated: 2026-04-16 | v2 -->
 
-Radically simple gettext tokens extraction tool for:
+[![License](https://img.shields.io/badge/License-See%20Repository-blue.svg)](LICENSE) [![ownCloud OSPO](https://img.shields.io/badge/OSPO-ownCloud-blue)](https://kiteworks.com/opensource)
 
-- HTML
-- Jade/Pug
-- Javascript/ES7+
-- Vue
-- TypeScript
-- Nativescript Vue with [native and web shared code](https://www.nativescript.org/vue)
+A fork of the [Polyconseil/easygettext](https://github.com/Polyconseil/easygettext) library providing simple gettext token extraction tools for HTML, Jade/Pug, JavaScript/ES7+, Vue, TypeScript, and Nativescript Vue files. It also includes a PO-to-JSON converter for use in frontend internationalization workflows.
 
-files.
+> **Note:** This repository is in maintenance/legacy mode and is no longer actively developed.
 
-Also ships with a PO-to-JSON converter.
+## Getting Started
 
-### Installation
-You can install the [easygettext](https://www.npmjs.com/package/easygettext) package by running 
+Install via npm:
+
 ```bash
 npm install --save-dev easygettext
 ```
-or
+
+Extract gettext tokens from templates:
+
 ```bash
-yarn add --dev easygettext
+gettext-extract --output dictionary.pot foo.html bar.pug component.vue
 ```
 
+Convert PO files to JSON:
 
-### Usage & Examples
-
-#### HTML token extraction
-
-Simply invoke the tool on the templates you want to extract a POT dictionary template from.
-The optional '--output' argument enables you to directly output to a file.
-
+```bash
+gettext-compile --output translations.json fr.po en.po
 ```
+
+## Documentation
+
+- [npm package](https://www.npmjs.com/package/easygettext)
+- [Upstream repository](https://github.com/Polyconseil/easygettext)
+
+## Features
+
+Capabilities of the gettext extraction toolchain:
+
+### Supported File Types
+
+- HTML
+- Jade/Pug
+- JavaScript/ES7+
+- Vue (both `<template>` and `<script>` sections)
+- TypeScript
+- Nativescript Vue
+
+### Token Extraction (`gettext-extract`)
+
+Extract translatable strings from source files into a POT dictionary:
+
+```bash
 gettext-extract --output dictionary.pot foo.html bar.pug component.vue sourcefile.js
 ```
 
-**CLI usage:**
+**CLI options:**
+
 ```
-gettext-extract [--attribute EXTRA-ATTRIBUTE] [--filterPrefix FILTER-PREFIX] [--output OUTFILE] [--parser auto|acorn|babel] <FILES>
-```
-
-It recognizes the following token flavours (currently; feel free to extend it!)
-
-```html
-<div translate>Hello World</div>
-
-<div translate translate-context="According to...">Hello World</div>
-
-<div translate translate-comment="My comment...">Hello World</div>
-
-<div translate translate-plural="Hello worlds">Hello World</div>
-
-<div placeholder="{{ 'Hello World' | translate }}"></div>
-
-<div placeholder="{{ scopeVariable || ('Hello World' | translate) }}"></div>
-
-<get-text>Hello World</get-text>
-
-<i18n>Hello World</i18n>
-
-<translate>Hello World</translate>
-
-<!--  The following becomes 'Broken strings are joined'  -->
-<span ng-bind="{{ 'Broken '
- + 'strings ' +
- 'are ' +
- 'joined' |translate}}"></span>
-
- <span ng-bind="'Bed n\'' + ' breakfast' |translate"></span>
-
- <!-- JavaScript expressions are parsed and compiled -->
-<span ng-bind="true ? 'Always' : 'Never' |i18n "></span>
-
-<!--  By supplying the  --filterPrefix '::' parameter  -->
-<span>{{:: 'Something …' |translate}}</span>
-
-<!--  The default delimiters '{{' and '}}' must be changed to empty strings to handle these examples  -->
-<span ng-bind=":: 'Something …' |translate"></span>
-
-<div placeholder="'Hello World' | translate"></div>
+gettext-extract [--attribute EXTRA-ATTRIBUTE] [--filterPrefix FILTER-PREFIX]
+                [--output OUTFILE] [--parser auto|acorn|babel] <FILES>
 ```
 
-You can combine any context, comment and plural together. Also, you can use 'i18n' instead
-of 'translate' as master token.
+Recognized token formats include `<div translate>`, `<get-text>`, `<i18n>`, `<translate>`, Angular filter expressions (`{{ 'text' | translate }}`), and JavaScript functions (`$gettext()`, `$pgettext()`, `$ngettext()`).
 
-You can also provide your own master tokens:
+Custom master tokens can be provided via `--attribute`:
 
 ```bash
-gettext-extract --attribute v-translate --output dictionary.pot foo.html bar.jade
-
-gettext-extract --attribute v-translate --attribute v-i18n --output dictionary.pot foo.html bar.jade
-
-gettext-extract --startDelimiter '[#' --endDelimiter '#]' --output dictionary.pot foo.html bar.jade
+gettext-extract --attribute v-translate --output dictionary.pot foo.html
 ```
 
-`gettext-extract` can also remove optional HTML whitespaces inside tags to translate (see [PR 68](https://github.com/Polyconseil/easygettext/pull/68) for more information):
+Use `--parser babel` for optional-chaining, nullish-coalesce, or other Babel plugins.
 
-```
-gettext-extract --removeHTMLWhitespaces --output dictionary.pot foo.html
-```
+### PO-to-JSON Compilation (`gettext-compile`)
 
-#### Supports parsing with acorn and babel
-
-If you want to use optional-chaining, nullish-coalesce or any babel plugin, you might want to set the parameter `--parser babel`.
-
-```
-gettext-extract --parser babel --output dictionary.pot foo.html
-```
-
-It can be set to:
-`--parser` `auto|acorn|babel`
-
-More info at [PR 72](https://github.com/Polyconseil/easygettext/pull/72)
-
-
-#### Javascript/ES7 token extraction
-
-The usage stays the same but with a Javascript file !
-
-```bash
-gettext-extract somefile.js
-```
-
-```javascript
-
-const myVar = $gettext("My fantastic msgid")
-
-const myConcatVar = $gettext(
-  "My"
-  + "fantastic"
-  + "msgid"
-)
-
-const myTempVar = $gettext(
-  `My
-  fantastic
-  msgid`
-)
-
-const myContextualizedVar = $pgettext("some context", "Some other string")
-
-const myPluralVar = $ngettext(...)
-```
-
-We recognize the ``$gettext``, ``$pgettext`` and ``$ngettext`` tokens as the ones from which we can extract text from.
-
-Those tokens are frozen for now, but feel free to make a pull request and add support for variable ones :)
-
-We currently can't extract **template strings with variables** though.
-
-
-#### Extract from Vue components
-
-You can also extract the strings marked as translatable inside the ``<script>`` and ``<template>`` sections of Vue.js components:
-
-```bash
-gettext-extract MyComponent.vue
-```
-
-With a component that looks like this:
-
-```html
-    <template>
-        <h1>{{ greeting_message }}</h1>
-        <p>{{ number_of_people_here }}</p>
-
-        <h2 v-translate> Some text to be translated
-    </template>
-
-    <script>
-        export default {
-            name: "greetings",
-            computed: {
-                greeting_message() {
-                    return this.$gettext("Hello there!")
-                },
-                number_of_people_here(nb_folks) {
-                    return this.$ngettext("There is ${ n } person here.", "There are ${ n } persons here.", nb_folks)
-                }
-            }
-        }
-    </script>
-```
-
-The Javascript & HTML (or Pug) extraction within a Vue component works with the same rules as stated upper in this document.
-
-
-#### Extracting from multiple files
-`gettext-extract` needs the exact file paths to work. If you want to extract gettext from all files in a folder, you can use the UNIX find command. Here is an example as a npm script:
-
-```jsonc
-{
-  //...
-  "scripts": {
-    // This is for VueJS files, please adapt for HTML or Jade/Pug templates
-    "extract-gettext-cli": "gettext-extract --attribute v-translate --output dictionary.pot $(find scripts/src/components -type f -name '*.vue')"
-  }
-}
-```
-
-
-#### gettext-compile
-
-Outputs or writes to an output file, the sanitized JSON version of a PO file.
+Convert PO files to a sanitized JSON format for frontend use:
 
 ```bash
 gettext-compile --output translations.json fr.po en.po de.po
 ```
 
-### AngularJS
-If you use `easygettext` to extract files from an AngularJS code base, you might find the following tips helpful.
+### Vue Component Extraction
 
-To cover the cases (1)
-```html
-<input placeholder="{{:: 'Insert name …' |translate }}">
-<input placeholder="{{ 'Insert name …' |translate }}">
-```
+Translatable strings inside both `<template>` and `<script>` sections of `.vue` files are extracted using the same rules as HTML and JavaScript extraction.
 
-and (2)
-```html
-<a href="#" ng-bind=":: 'Link text' |translate"></a>
-<a href="#" ng-bind="'Link text' |translate"></a>
-<a href="#">{{::'Link text' |translate}}</a>
-<a href="#">{{'Link text' |translate}}</a>
-```
-you should run the extraction tool twice.  Once with the command-line arguments
-```bash
---startDelimiter '{{' --endDelimiter '}}' --filterPrefix '::'
-```
-and once with the command-line arguments
+### Multi-File Extraction
+
+Use the UNIX `find` command to extract from all files in a folder:
 
 ```bash
---output ${html_b} --startDelimiter '' --endDelimiter '' --filterPrefix '::'
+gettext-extract --attribute v-translate --output dictionary.pot $(find src/components -type f -name '*.vue')
 ```
 
-The following Bash script shows how `msgcat` might help
-```bash
-#!/usr/bin/env bash
+## Part of ownCloud Infrastructure
 
-input_files="$(find ./src/ -iname \*\.html)"
-workdir=$(mktemp -d "${TMPDIR:-/tmp/}$(basename $0).XXXXXXXXXXXX") || exit 1
+This is a forked utility library used in the ownCloud build toolchain for extracting translatable strings from frontend source files.
 
-html_a=${workdir}/messages-html-interpolate.pot
-html_b=${workdir}/messages-html.pot
+> **Note:** This repository is currently in Archived/Legacy mode. It is a fork of [Polyconseil/easygettext](https://github.com/Polyconseil/easygettext) and is no longer actively maintained.
 
-./dist/extract-cli.js --output ${html_a} --startDelimiter '{{' --endDelimiter '}}' --filterPrefix '::' ${input_files}
-./dist/extract-cli.js --output ${html_b} --startDelimiter '' --endDelimiter '' --filterPrefix '::' ${input_files}
+## Community & Support
 
-# Extract gettext “messages” from JavaScript files here, into ${es_a} …
-es_a=${workdir}/ecmascript.pot
-# [...] > ${es_a}
+**[Star](https://github.com/owncloud/easygettext)** this repo and **Watch** for release notifications!
 
-# Merge the different catalog templates with `msgcat`:
-merged_pot=${workdir}/merged.pot
-msgcat ${html_a} ${html_b} ${es_a} > ${merged_pot}
+- [ownCloud Website](https://owncloud.com)
+- [Community Discussions](https://github.com/orgs/owncloud/discussions)
+- [Matrix Chat](https://app.element.io/#/room/#owncloud:matrix.org)
+- [Documentation](https://doc.owncloud.com)
+- [Enterprise Support](https://owncloud.com/contact-us/)
+- [OSPO Home](https://kiteworks.com/opensource)
 
-# Cleanup, in case `msgcat` gave merge-conflicts in catalog header.
-header=${workdir}/header.pot
-sed -e '/^$/q' < ${html_a} > ${header}
+## Contributing
 
-body=${workdir}/body.pot
-sed '1,/^$/d' < ${merged_pot} > ${body}
+We welcome contributions! Please read the [Contributing Guidelines](CONTRIBUTING.md)
+and our [Code of Conduct](CODE_OF_CONDUCT.md) before getting started.
 
-cat ${header} ${body} > ${output_file}
+### Workflow
 
-# Remove temporary directory with working files.
-rm -r ${workdir}
-```
-Please note that the script needs to be modified to match your needs and environment.
+- **Rebase Early, Rebase Often!** We use a rebase workflow. Always rebase on the target branch before submitting a PR.
+- **Dependabot**: Automated dependency updates are managed via Dependabot. Review and merge dependency PRs promptly.
+- **Signed Commits**: All commits **must** be PGP/GPG signed. See [GitHub's signing guide](https://docs.github.com/en/authentication/managing-commit-signature-verification).
+- **DCO Sign-off**: Every commit must carry a `Signed-off-by` line:
+  ```
+  git commit -s -S -m "your commit message"
+  ```
+- **GitHub Actions Policy**: Workflows may only use actions that are (a) owned by `owncloud`, (b) created by GitHub (`actions/*`), or (c) verified in the GitHub Marketplace.
 
-### Testing
+## Security
 
-Run the tests using [jest](https://jestjs.io/):
+**Do not open a public GitHub issue for security vulnerabilities.**
 
-```bash
-npm test
-```
+Report vulnerabilities at **<https://security.owncloud.com>** -- see [SECURITY.md](SECURITY.md).
 
-### Testing the CLI
+Bug bounty: [YesWeHack ownCloud Program](https://yeswehack.com/programs/owncloud-bug-bounty-program)
 
-Run:
+## License
 
-```bash
-./src/extract-cli.js --attribute v-translate --attribute v-i18n ~/output.html
-```
+See [LICENSE](LICENSE) for license details.
 
+## About the ownCloud OSPO
 
-### Motivation
+The [Kiteworks Open Source Program Office](https://kiteworks.com/opensource), operating under
+the [ownCloud](https://owncloud.com) brand, launched on May 5, 2026, to steward the open source
+ecosystem around ownCloud's products. The OSPO ensures transparent governance, license compliance,
+community health, and sustainable collaboration between the open source community and
+[Kiteworks](https://www.kiteworks.com), which acquired ownCloud in 2023.
 
-[angular-gettext](https://angular-gettext.rocketeer.be/) is a very neat tool, that comes with Grunt tooling
-to extract translation tokens from your Pug/Jade/HTML templates and JavaScript code.
+- **OSPO Home**: <https://kiteworks.com/opensource>
+- **GitHub**: <https://github.com/owncloud>
+- **ownCloud**: <https://owncloud.com>
 
-Unfortunately, this has two drawbacks:
+For questions about the OSPO or licensing, contact ospo@kiteworks.com.
 
-- It isn't a simple command-line interface, and forces the usage of Grunt;
-- It is angular-specific.
+### License Migration to Apache 2.0
 
-This library comes up with two simple CLI tools to extract and compile your HTML tokens.
+The OSPO is driving a strategic relicensing of ownCloud repositories toward the
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0), following
+the [Apache Software Foundation's third-party license policy](https://www.apache.org/legal/resolved.html).
 
-### Why This Library?
+Individual repositories will migrate as their audit is completed. The LICENSE file
+in each repo reflects its **current** license status (not the target).
 
-Our frontend toolchain, [systematic](https://github.com/Polyconseil/systematic) doesn't rely on Grunt/Gulp/Broccoli/...
-and uses a combination of simple Makefiles and CLI tools to do the job.
-
-The toolchain being framework-agnostic, we don't want to depend on Angular to extract our HTML translation tokens.
-On another note, we use the standard [xgettext](http://www.gnu.org/savannah-checkouts/gnu/gettext/manual/html_node/xgettext-Invocation.html)
-tool to extract our JavaScript translation tokens.
-
-Nevertheless, the way [angular-gettext](https://angular-gettext.rocketeer.be/) does it (with tokens, directly in HTML) is elegant, is used by many other
-libraries and will also be the way to do it in Angular2.
-
-Also, by utilizing either [acorn](https://github.com/ternjs/acorn) or [babel](https://github.com/babel/babel), this tool will parse and compile typical JavaScript expressions used in translate-filter expressions. For example, exposed to a (AngularJS-based) fragment like
-```html
-<span ng-bind="isNight ? 'Moon' + 'shine' : 'Day' + 'light' |translate"></span>
-<span ng-bind="isC ? 'C' + (isD ? 'D' : 'd') : 'c' + (isE ? 'E' : 'e') |i18n "></span>
-```
-will produce the following strings
-```text
-Moonshine
-Daylight
-CD
-Cd
-cE
-ce
-```
-Which will be correctly looked up and translated during runtime, at least by [angular-gettext](https://angular-gettext.rocketeer.be/). 
-
-### Credits
-
-Thanks a million to [@rubenv](https://github.com/rubenv) for the initial ideas and
-implementations in angular-gettext-tools, which inspired me a lot.
-
-Thanks to ES6 and Babel for being awesome.
-
-### Licensing
-
-MIT
+**Current license: Not detected.** The OSPO will determine the current license status of this
+repository before planning any migration steps. If you know the intended license, please open an
+issue or contact ospo@kiteworks.com.
