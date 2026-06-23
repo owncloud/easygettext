@@ -38,7 +38,7 @@
     "acorn": "^7.4.0",
     "acorn-stage3": "^4.0.0",
     "acorn-walk": "^8.0.0",
-    "cheerio": "^1.0.0-rc.3",
+    "cheerio": "^1.0.0",
     "estree-walker": "^2.0.1",
     "flow-remove-types": "^2.135.0",
     "minimist": "^1.2.5",
